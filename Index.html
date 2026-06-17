@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AlbaránIA">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>AlbaránIA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+
+    <script>
+      if('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+      }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --purple:  #7c3aed;
+            --purple2: #a855f7;
+            --blue:    #2563eb;
+            --cyan:    #06b6d4;
+            --green:   #059669;
+            --amber:   #d97706;
+            --red:     #dc2626;
+            --bg:      #0f0a1e;
+            --surface: #1a1030;
+            --card:    #221840;
+            --border:  rgba(255,255,255,.08);
+            --text:    #f1f5f9;
+            --muted:   rgba(241,245,249,.45);
+            --radius:  16px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 0%, rgba(124,58,237,.18) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 35% at 85% 90%, rgba(6,182,212,.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .wrap { position: relative; z-index: 1; }
+
+        /* ══ HEADER ══════════════════════════════ */
+        .header {
+            padding: 16px 20px 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(15,10,30,.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-pill {
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            border-radius: 10px;
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 19px;
+        }
+        .logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+        .logo-text span { 
+            background: linear-gradient(90deg, var(--purple2), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .ai-badge {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(124,58,237,.2);
+            border: 1px solid rgba(124,58,237,.4);
+            border-radius: 20px;
+            padding: 5px 11px;
+            font-size: 11px; font-weight: 600;
+            color: var(--purple2);
+            letter-spacing: .3px;
+        }
+        .ai-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--cyan);
+            animation: blink 2s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
+
+        /* ══ PAGE ════════════════════════════════ */
+        .page { padding: 20px 16px 100px; }
+
+        .section-label {
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+
+        /* ══ CARDS ════════════════════════════════ */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .card-title-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .ci-purple  { background: rgba(124,58,237,.25); }
+        .ci-cyan    { background: rgba(6,182,212,.2); }
+        .ci-green   { background: rgba(5,150,105,.2); }
+        .ci-indigo  { background: rgba(99,102,241,.2); }
+        .card-title { font-size: 14px; font-weight: 700; }
+        .card-body  { padding: 16px; }
+
+        /* ══ INPUTS ═══════════════════════════════ */
+        .input-label {
+            font-size: 11px; font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase; letter-spacing: .5px;
+            margin-bottom: 6px;
+            display: block;
+        }
+        input[type=text], input[type=date], input[type=number],
+        input[type=password], input[type=month] {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            -webkit-appearance: none;
+            transition: border .15s, background .15s;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--purple2);
+            background: rgba(124,58,237,.1);
+        }
+        input::placeholder { color: rgba(241,245,249,.25); }
+
+        /* ══ UPLOAD ZONE ══════════════════════════ */
+        .upload-zone {
+            border: 2px dashed rgba(168,85,247,.35);
+            border-radius: 14px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(124,58,237,.06);
+            transition: background .2s, border-color .2s;
+        }
+        .upload-zone:active { background: rgba(124,58,237,.12); border-color: var(--purple2); }
+        .upload-zone .big-icon { font-size: 46px; margin-bottom: 10px; display: block; }
+        .upload-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .upload-zone p  { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+        /* ══ SPINNER ══════════════════════════════ */
+        .loading-bar {
+            display: none; align-items: center; gap: 10px;
+            margin-top: 14px;
+            background: rgba(6,182,212,.1);
+            border: 1px solid rgba(6,182,212,.25);
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .loading-bar.on { display: flex; }
+        .spin {
+            width: 18px; height: 18px; flex-shrink: 0;
+            border: 2px solid rgba(6,182,212,.25);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: rot .7s linear infinite;
+        }
+        @keyframes rot { to { transform: rotate(360deg); } }
+        .loading-bar span { font-size: 13px; font-weight: 500; color: var(--cyan); }
+
+        /* ══ GRIDS & BUTTONS ═══════════════════════ */
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .grid1 { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 13px 20px;
+            border: none; border-radius: 12px;
+            font-family: inherit; font-size: 14px; font-weight: 700;
+            cursor: pointer; width: 100%;
+            transition: filter .15s, transform .1s;
+            letter-spacing: .2px;
+        }
+        .btn:active { transform: scale(.96); filter: brightness(.9); }
+        .btn-purple {
+            background: linear-gradient(135deg, var(--purple), var(--purple2));
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(124,58,237,.4);
+        }
+        .btn-green {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(5,150,105,.4);
+        }
+        .btn-amber {
+            background: linear-gradient(135deg, #b45309, #f59e0b);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(180,83,9,.4);
+        }
+        .btn-blue {
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(29,78,216,.4);
+        }
+        .btn-ghost {
+            background: rgba(255,255,255,.07);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+        .btn-sm { padding: 8px 14px; font-size: 12px; width: auto; border-radius: 9px; }
+        .btn-danger-sm {
+            background: rgba(220,38,38,.2);
+            border: 1px solid rgba(220,38,38,.3);
+            color: #fca5a5;
+            padding: 8px 12px; font-size: 12px; font-weight: 700;
+            width: auto; border-radius: 9px;
+            cursor: pointer; font-family: inherit;
+        }
+        .form-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+        /* ══ TOTAL PANEL ══════════════════════════ */
+        .total-card {
+            background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(6,182,212,.15));
+            border: 1px solid rgba(168,85,247,.3);
+            border-radius: var(--radius);
+            padding: 20px 20px 18px;
+            margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px;
+        }
+        .total-left { display: flex; flex-direction: column; gap: 2px; }
+        .total-eyebrow { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+        .total-num {
+            font-size: 44px; font-weight: 800; line-height: 1;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(90deg, var(--purple2), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .total-unit { font-size: 14px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+        .month-pick { display: flex; flex-direction: column; gap: 4px; }
+        .month-pick label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+        .month-pick input {
+            width: 140px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(168,85,247,.3);
+            color: var(--text);
+            font-size: 13px;
+            border-radius: 9px;
+            padding: 8px 10px;
+        }
+
+        /* ══ ALBARÁN CARDS ════════════════════════ */
+        .albaran-list { display: flex; flex-direction: column; gap: 10px; }
+        .albaran-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .albaran-top {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 14px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .albaran-fecha {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 600;
+            background: rgba(124,58,237,.2);
+            border: 1px solid rgba(124,58,237,.3);
+            border-radius: 6px;
+            padding: 3px 8px;
+            color: var(--purple2);
+        }
+        .albaran-horas {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px; font-weight: 800;
+            background: linear-gradient(90deg, var(--purple2), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .albaran-horas small { font-size: 12px; font-weight: 600; opacity: .6; }
+        .albaran-body { padding: 10px 14px 12px; }
+        .albaran-cliente { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .albaran-obra { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+        .albaran-meta {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .meta-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px; font-weight: 500; color: var(--muted);
+        }
+        .albaran-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* ══ VISUALIZADOR DE IMAGEN ═══════════════ */
+        .img-preview-btn {
+            background: rgba(6,182,212,.15);
+            border: 1px solid rgba(6,182,212,.3);
+            color: var(--cyan);
+        }
+        .modal-img {
+            display: none;
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(10,5,20,.95);
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-img.open { display: flex; }
+        .modal-img img { max-width: 100%; max-height: 85dvh; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.5); }
+        .modal-close {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255,255,255,.1); border: none;
+            width: 44px; height: 44px; border-radius: 50%;
+            color: #fff; font-size: 20px; cursor: pointer;
+        }
+
+        .empty { text-align: center; padding: 48px 24px; color: var(--muted); }
+        .empty .e-icon { font-size: 50px; margin-bottom: 12px; }
+        .empty p { font-size: 14px; line-height: 1.5; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, .spin, .ai-dot { animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="header">
+    <div class="logo">
+        <div class="logo-pill">📋</div>
+        <div class="logo-text">Albarán<span>IA</span></div>
+    </div>
+    <div class="ai-badge"><div class="ai-dot"></div> Gemini</div>
+</header>
+
+<div class="page">
+
+    <p class="section-label">Configuración</p>
+    <div class="card">
+        <div class="card-title-row">
+            <div class="card-icon ci-purple">🔑</div>
+            <span class="card-title">API Key de Gemini</span>
+        </div>
+        <div class="card-body">
+            <label class="input-label">Tu clave de acceso</label>
+            <input type="password" id="apiKey" placeholder="AIzaSy…" autocomplete="off">
+            <p style="font-size:11px;color:var(--muted);margin-top:7px;">Se guarda localmente en tu dispositivo · No se comparte</p>
+        </div>
+    </div>
+
+    <p class="section-label">Nuevo albarán</p>
+    <div class="card">
+        <div class="card-title-row">
+            <div class="card-icon ci-cyan">🧠</div>
+            <span class="card-title">Lector con IA</span>
+        </div>
+        <div class="card-body">
+            <input type="file" id="fotoAlbaran" accept="image/*" capture="environment" style="display:none;" onchange="leerAlbaranConIA(event)">
+            <div class="upload-zone" onclick="document.getElementById('fotoAlbaran').click()">
+                <span class="big-icon">📸</span>
+                <h3>Fotografía el albarán</h3>
+                <p>La IA extraerá los datos automáticamente y guardará la imagen</p>
+                <button class="btn btn-purple" style="max-width:260px;margin:0 auto;" onclick="event.stopPropagation();document.getElementById('fotoAlbaran').click()">
+                    📷 Hacer foto o subir imagen
+                </button>
+            </div>
+            <div class="loading-bar" id="statusCarga">
+                <div class="spin"></div>
+                <span>Analizando imagen con IA…</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title-row">
+            <div class="card-icon ci-green">✏️</div>
+            <span class="card-title">Datos del albarán</span>
+        </div>
+        <div class="card-body">
+            <form id="formAlbaran">
+                <input type="hidden" id="editIndex" value="-1">
+                <input type="hidden" id="imagenTemporal" value="">
+                
+                <div class="grid2">
+                    <div class="form-group">
+                        <label class="input-label">Fecha</label>
+                        <input type="date" id="fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Horas totales</label>
+                        <input type="number" id="horas" step="0.25" placeholder="0.00" required>
+                    </div>
+                </div>
+                <div class="grid1">
+                    <div class="form-group">
+                        <label class="input-label">Cliente</label>
+                        <input type="text" id="cliente" required placeholder="Nombre del cliente">
+                    </div>
+                </div>
+                <div class="grid1">
+                    <div class="form-group">
+                        <label class="input-label">Obra / Destino</label>
+                        <input type="text" id="obra" placeholder="Lugar de trabajo">
+                    </div>
+                </div>
+                <div class="grid2">
+                    <div class="form-group">
+                        <label class="input-label">Operario</label>
+                        <input type="text" id="operario" placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Nº Vehículo</label>
+                        <input type="text" id="numVehiculo" placeholder="—">
+                    </div>
+                </div>
+                <div class="grid1">
+                    <div class="form-group">
+                        <label class="input-label">Tipo de vehículo</label>
+                        <input type="text" id="tipoVehiculo" placeholder="Camión, dumper…">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-green" id="btnGuardar">💾 Guardar en contabilidad</button>
+                    <button type="button" class="btn btn-ghost" onclick="limpiarFormulario()">Limpiar campos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <p class="section-label">Contabilidad mensual</p>
+    <div class="total-card">
+        <div class="total-left">
+            <span class="total-eyebrow">Horas acumuladas</span>
+            <div class="total-num" id="totalHorasPanel">0.00</div>
+            <div class="total-unit">horas este mes</div>
+        </div>
+        <div class="month-pick">
+            <label>Mes</label>
+            <input type="month" id="filtroMes" onchange="renderizarHistorial()">
+        </div>
+    </div>
+
+    <div class="albaran-list" id="tablaCuerpo"></div>
+
+    <p class="section-label" style="margin-top:24px;">Copia de seguridad</p>
+    <div class="card" style="background:rgba(255,25

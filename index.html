@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AlbaránIA">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>AlbaránIA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+
+    <script>
+      if('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js');
+        });
+      }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --purple:  #7c3aed;
+            --purple2: #a855f7;
+            --blue:    #2563eb;
+            --cyan:    #06b6d4;
+            --green:   #059669;
+            --amber:   #d97706;
+            --red:     #dc2626;
+            --bg:      #0f0a1e;
+            --surface: #1a1030;
+            --card:    #221840;
+            --border:  rgba(255,255,255,.08);
+            --text:    #f1f5f9;
+            --muted:   rgba(241,245,249,.45);
+            --radius:  16px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ── FONDO GRADIENTE SUTIL ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 0%, rgba(124,58,237,.18) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 35% at 85% 90%, rgba(6,182,212,.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .wrap { position: relative; z-index: 1; }
+
+        /* ══ HEADER ══════════════════════════════ */
+        .header {
+            padding: 16px 20px 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(15,10,30,.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .logo-pill {
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            border-radius: 10px;
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 19px;
+        }
+        .logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+        .logo-text span { 
+            background: linear-gradient(90deg, var(--purple2), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .ai-badge {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(124,58,237,.2);
+            border: 1px solid rgba(124,58,237,.4);
+            border-radius: 20px;
+            padding: 5px 11px;
+            font-size: 11px; font-weight: 600;
+            color: var(--purple2);
+            letter-spacing: .3px;
+        }
+        .ai-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--cyan);
+            animation: blink 2s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
+
+        /* ══ PAGE ════════════════════════════════ */
+        .page { padding: 20px 16px 100px; }
+
+        /* ══ SECTION LABEL ════════════════════════ */
+        .section-label {
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+
+        /* ══ CARDS ════════════════════════════════ */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .card-title-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .ci-purple  { background: rgba(124,58,237,.25); }
+        .ci-cyan    { background: rgba(6,182,212,.2); }
+        .ci-green   { background: rgba(5,150,105,.2); }
+        .ci-indigo  { background: rgba(99,102,241,.2); }
+        .card-title { font-size: 14px; font-weight: 700; }
+        .card-body  { padding: 16px; }
+
+        /* ══ API INPUT ════════════════════════════ */
+        .input-label {
+            font-size: 11px; font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase; letter-spacing: .5px;
+            margin-bottom: 6px;
+            display: block;
+        }
+        input[type=text], input[type=date], input[type=number],
+        input[type=password], input[type=month] {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            -webkit-appearance: none;
+            transition: border .15s, background .15s;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--purple2);
+            background: rgba(124,58,237,.1);
+        }
+        input::placeholder { color: rgba(241,245,249,.25); }
+
+        /* ══ UPLOAD ZONE ══════════════════════════ */
+        .upload-zone {
+            border: 2px dashed rgba(168,85,247,.35);
+            border-radius: 14px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(124,58,237,.06);
+            transition: background .2s, border-color .2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .upload-zone:active { background: rgba(124,58,237,.12); border-color: var(--purple2); }
+        .upload-zone .big-icon { font-size: 46px; margin-bottom: 10px; display: block; }
+        .upload-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .upload-zone p  { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+        /* ══ SPINNER ══════════════════════════════ */
+        .loading-bar {
+            display: none; align-items: center; gap: 10px;
+            margin-top: 14px;
+            background: rgba(6,182,212,.1);
+            border: 1px solid rgba(6,182,212,.25);
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .loading-bar.on { display: flex; }
+        .spin {
+            width: 18px; height: 18px; flex-shrink: 0;
+            border: 2px solid rgba(6,182,212,.25);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: rot .7s linear infinite;
+        }
+        @keyframes rot { to { transform: rotate(360deg); } }
+        .loading-bar span { font-size: 13px; font-weight: 500; color: var(--cyan); }
+
+        /* ══ FORM GRID ════════════════════════════ */
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .grid1 { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+        /* ══ BUTTONS ══════════════════════════════ */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 13px 20px;
+            border: none; border-radius: 12px;
+            font-family: inherit; font-size: 14px; font-weight: 700;
+            cursor: pointer; width: 100%;
+            transition: filter .15s, transform .1s;
+            -webkit-tap-highlight-color: transparent;
+            letter-spacing: .2px;
+        }
+        .btn:active { transform: scale(.96); filter: brightness(.9); }
+        .btn-purple {
+            background: linear-gradient(135deg, var(--purple), var(--purple2));
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(124,58,237,.4);
+        }
+        .btn-green {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(5,150,105,.4);
+        }
+        .btn-amber {
+            background: linear-gradient(135deg, #b45309, #f59e0b);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(180,83,9,.4);
+        }
+        .btn-ghost {
+            background: rgba(255,255,255,.07);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+        .btn-sm { padding: 8px 14px; font-size: 12px; width: auto; border-radius: 9px; }
+        .btn-danger-sm {
+            background: rgba(220,38,38,.2);
+            border: 1px solid rgba(220,38,38,.3);
+            color: #fca5a5;
+            padding: 8px 12px; font-size: 12px; font-weight: 700;
+            width: auto; border-radius: 9px;
+            cursor: pointer; font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .form-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+        /* ══ TOTAL PANEL ══════════════════════════ */
+        .total-card {
+            background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(6,182,212,.15));
+            border: 1px solid rgba(168,85,247,.3);
+            border-radius: var(--radius);
+            padding: 20px 20px 18px;
+            margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px;
+        }
+        .total-left { display: flex; flex-direction: column; gap: 2px; }
+        .total-eyebrow { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+        .total-num {
+            font-size: 44px; font-weight: 800; line-height: 1;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(90deg, var(--purple2), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .total-unit { font-size: 14px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+        .month-pick { display: flex; flex-direction: column; gap: 4px; }
+        .month-pick label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+        .month-pick input {
+            width: 140px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(168,85,247,.3);
+            color: var(--text);
+            font-size: 13px;
+            border-radius: 9px;
+            padding: 8px 10px;
+        }
+
+        /* ══ ALBARÁN CARDS ════════════════════════ */
+        .albaran-list { display: flex; flex-direction: column; gap: 10px; }
+        .albaran-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .albaran-top {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 14px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .albaran-fecha {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 600;
+            background: rgba(124,58,237,.2);
+            border: 1px solid rgba(124,58,237,.3);
+            border-radius: 6px;
+            padding: 3px 8px;
+            color: var(--purple2);
+        }
+        .albaran-horas {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px; font-weight: 800;
+            background: linear-gradient(90deg, var(--purple2), var(--cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .albaran-horas small { font-size: 12px; font-weight: 600; opacity: .6; }
+        .albaran-body { padding: 10px 14px 12px; }
+        .albaran-cliente { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .albaran-obra { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+        .albaran-meta {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .meta-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px; font-weight: 500; color: var(--muted);
+        }
+        .albaran-actions { display: flex; gap: 8px; }
+        .resumen-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 998;
+            background: rgba(0,0,0,.7);
+            align-items: flex-end; justify-content: center;
+        }
+        .resumen-overlay.on { display: flex; }
+        .resumen-sheet {
+            background: var(--surface);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 480px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 20px 18px 28px;
+            border-top: 1px solid var(--border);
+        }
+        .resumen-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .resumen-header h3 { font-size: 17px; font-weight: 800; }
+        .resumen-close {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(255,255,255,.08);
+            border: none; color: var(--text);
+            font-size: 16px; cursor: pointer;
+        }
+        .resumen-total {
+            background: linear-gradient(135deg, rgba(124,58,237,.25), rgba(6,182,212,.15));
+            border: 1px solid rgba(168,85,247,.3);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .resumen-total span:first-child { font-size: 13px; font-weight: 600; color: var(--muted); }
+        .resumen-total span:last-child {
+            font-size: 22px; font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--purple2);
+        }
+        .resumen-dia {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        .resumen-dia:last-child { border-bottom: none; }
+        .resumen-dia-fecha { font-size: 13px; font-weight: 600; }
+        .resumen-dia-fecha small { display:block; font-size:11px; color:var(--muted); font-weight:500; text-transform:capitalize; }
+        .resumen-dia-horas {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px; font-weight: 700;
+            color: var(--cyan);
+        }
+        .resumen-empty { text-align:center; padding:30px 10px; color:var(--muted); font-size:13px; }
+        .albaran-thumb {
+            width: 56px; height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .foto-viewer {
+            display: none;
+            position: fixed; inset: 0; z-index: 999;
+            background: rgba(0,0,0,.9);
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .foto-viewer.on { display: flex; }
+        .foto-viewer img {
+            max-width: 100%; max-height: 90vh;
+            border-radius: 12px;
+        }
+        .foto-viewer-close {
+            position: absolute; top: 16px; right: 16px;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.15);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* ══ EMPTY STATE ══════════════════════════ */
+        .empty {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--muted);
+        }
+        .empty .e-icon { font-size: 50px; margin-bottom: 12px; }
+        .empty p { font-size: 14px; line-height: 1.5; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, .spin, .ai-dot { animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ══ HEADER ══ -->
+<header class="header">
+    <div class="logo">
+        <div class="logo-pill">📋</div>
+        <div class="logo-text">Albarán<span>IA</span></div>
+    </div>
+    <div class="ai-badge"><div class="ai-dot"></div> Gemini</div>
+</header>
+
+<div class="page">
+
+    <!-- API KEY -->
+    <p class="section-label">Configuración</p>
+    <div class="card">
+        <div class="card-title-row">
+            <div class="card-icon ci-purple">🔑</div>
+            <span class="card-title">API Key de Gemini</span>
+        </div>
+        <div class="card-body">
+            <label class="input-label">Tu clave de acceso</label>
+            <input type="password" id="apiKey" placeholder="AIzaSy…" autocomplete="off">
+            <p style="font-size:11px;color:var(--muted);margin-top:7px;">Se guarda localmente en tu dispositivo · No se comparte</p>
+        </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <p class="section-label">Nuevo albarán</p>
+    <div class="card">
+        <div class="card-title-row">
+            <div class="card-icon ci-cyan">🧠</div>
+            <span class="card-title">Lector con IA</span>
+        </div>
+        <div class="card-body">
+            <input type="file" id="fotoAlbaran" accept="image/*" capture="environment" style="display:none;" onchange="leerAlbaranConIA(event)">
+            <div class="upload-zone" onclick="document.getElementById('fotoAlbaran').click()">
+                <span class="big-icon">📸</span>
+                <h3>Fotografía el albarán</h3>
+                <p>La IA extraerá los datos automáticamente</p>
+                <button class="btn btn-purple" style="max-width:260px;margin:0 auto;" onclick="event.stopPropagation();document.getElementById('fotoAlbaran').click()">
+                    📷 Hacer foto o subir imagen
+                </button>
+            </div>
+            <div class="loading-bar" id="statusCarga">
+                <div class="spin"></div>
+                <span>Analizando imagen con IA…</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="card">
+        <div class="card-title-row">
+            <div class="card-icon ci-green">✏️</div>
+            <span class="card-title">Datos del albarán</span>
+        </div>
+        <div class="card-body">
+            <form id="formAlbaran">
+                <input type="hidden" id="editIndex" value="-1">
+                <div class="grid2">
+                    <div class="form-group">
+                        <label class="input-label">Fecha</label>
+                        <input type="date" id="fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Horas totales</label>
+                        <input type="number" id="horas" step="0.25" placeholder="0.00" required>
+                    </div>
+                </div>
+                <div class="grid1">
+                    <div class="form-group">
+                        <label class="input-label">Cliente</label>
+                        <input type="text" id="cliente" required placeholder="Nombre del cliente">
+                    </div>
+                </div>
+                <div class="grid1">
+                    <div class="form-group">
+                        <label class="input-label">Obra / Destino</label>
+                        <input type="text" id="obra" placeholder="Lugar de trabajo">
+                    </div>
+                </div>
+                <div class="grid2">
+                    <div class="form-group">
+                        <label class="input-label">Operario</label>
+                        <input type="text" id="operario" placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Nº Vehículo</label>
+                        <input type="text" id="numVehiculo" placeholder="—">
+                    </div>
+                </div>
+                <div class="grid1">
+                    <div class="form-group">
+                        <label class="input-label">Tipo de vehículo</label>
+                        <input type="text" id="tipoVehiculo" placeholder="Camión, dumper…">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-green" id="btnGuardar">💾 Guardar en contabilidad</button>
+                    <button type="button" class="btn btn-ghost" onclick="limpiarFormulario()">Limpiar campos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONTABILIDAD -->
+    <p class="section-label">Contabilidad mensual</p>
+
+    <div class="total-card">
+        <div class="total-left">
+            <span class="total-eyebrow">Horas acumuladas</span>
+            <div class="total-num" id="totalHorasPanel">0.00</div>
+            <div class="total-unit">horas este mes</div>
+        </div>
+        <div class="month-pick">
+            <label>Mes</label>
+            <input type="month" id="filtroMes" onchange="renderizarHistorial()">
+        </div>
+    </div>
+
+    <button class="btn btn-purple" style="margin-bottom:16px;" onclick="mostrarResumenMensual()">📊 Ver resumen del mes por días</button>
+
+    <!-- LISTA DE ALBARANES -->
+    <div class="albaran-list" id="tablaCuerpo"></div>
+
+    <!-- COPIA DE SEGURIDAD -->
+    <p class="section-label">Copia de seguridad</p>
+    <div class="card">
+        <div class="card-title-row">
+            <div class="card-icon ci-indigo">💾</div>
+            <span class="card-title">Exportar / Importar datos</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Guarda una copia de tus albaranes (incluye las fotos) o restaura una copia anterior.</p>
+            <input type="file" id="archivoImportar" accept="application/json" style="display:none;" onchange="importarDatos(event)">
+            <div style="display:flex;gap:10px;">
+                <button class="btn btn-purple" onclick="exportarDatos()">📤 Exportar</button>
+                <button class="btn btn-ghost" onclick="document.getElementById('archivoImportar').click()">📥 Importar</button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /.page -->
+</div><!-- /.wrap -->
+
+<div class="foto-viewer" id="fotoViewer" onclick="cerrarFoto()">
+    <button class="foto-viewer-close" onclick="cerrarFoto()">✕</button>
+    <img id="fotoViewerImg" src="" onclick="event.stopPropagation()">
+</div>
+
+<div class="resumen-overlay" id="resumenOverlay" onclick="cerrarResumen()">
+    <div class="resumen-sheet" onclick="event.stopPropagation()">
+        <div class="resumen-header">
+            <h3 id="resumenTitulo">Resumen del mes</h3>
+            <button class="resumen-close" onclick="cerrarResumen()">✕</button>
+        </div>
+        <div class="resumen-total">
+            <span>Total trabajado</span>
+            <span id="resumenTotalHoras">0.00 hrs</span>
+        </div>
+        <div id="resumenLista"></div>
+    </div>
+</div>
+
+<script>
+    let baseDatosAlbaranes = JSON.parse(localStorage.getItem('albaranes_reales_datos')) || [];
+    let fotoActual = null;
+
+    function comprimirImagen(base64, maxAncho = 700, calidad = 0.6) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width, h = img.height;
+                if (w > maxAncho) { h = h * (maxAncho / w); w = maxAncho; }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', calidad));
+            };
+            img.onerror = () => resolve(null);
+            img.src = base64;
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const hoy = new Date();
+        document.getElementById('filtroMes').value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+        document.getElementById('fecha').value = hoy.toISOString().split('T')[0];
+        if(localStorage.getItem('gemini_api_key'))
+            document.getElementById('apiKey').value = localStorage.getItem('gemini_api_key');
+        renderizarHistorial();
+    });
+
+    async function leerAlbaranConIA(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const apiKey = document.getElementById('apiKey').value.trim();
+        if (!apiKey) { alert("Introduce tu API Key de Gemini primero."); return; }
+        localStorage.setItem('gemini_api_key', apiKey);
+        const st = document.getElementById('statusCarga');
+        st.classList.add('on');
+        try {
+            const b64 = await archivoABase64(file);
+            const data = b64.split(',')[1];
+            const prompt = "Analiza la imagen de este albarán de trabajo y extrae los siguientes datos estrictamente en formato JSON válido, sin usar markdown ni bloques de código, solo el objeto JSON plano con estas claves: 'fecha' (en formato YYYY-MM-DD), 'operario', 'numVehiculo', 'tipoVehiculo', 'cliente', 'obra', 'horas' (un número decimal que sea el resultado de sumar las horas trabajadas que aparecen en las líneas de conceptos). Si no encuentras un dato pon cadena vacía.";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({contents:[{parts:[{text:prompt},{inlineData:{mimeType:file.type,data}}]}]})
+            });
+            const json = await res.json();
+            let txt = json.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim();
+            const d = JSON.parse(txt);
+            if(d.fecha) document.getElementById('fecha').value = d.fecha;
+            document.getElementById('operario').value = d.operario || '';
+            document.getElementById('numVehiculo').value = d.numVehiculo || '';
+            document.getElementById('tipoVehiculo').value = d.tipoVehiculo || '';
+            document.getElementById('cliente').value = d.cliente || '';
+            document.getElementById('obra').value = d.obra || '';
+            document.getElementById('horas').value = d.horas || '0';
+            fotoActual = await comprimirImagen(b64);
+            document.getElementById('formAlbaran').scrollIntoView({behavior:'smooth',block:'start'});
+        } catch(e) {
+            console.error(e);
+            alert("Error al procesar el albarán. Comprueba la API Key y que la imagen sea clara.");
+        } finally {
+            st.classList.remove('on');
+        }
+    }
+
+    function archivoABase64(file) {
+        return new Promise((res,rej)=>{ const r=new FileReader(); r.readAsDataURL(file); r.onload=()=>res(r.result); r.onerror=rej; });
+    }
+
+    document.getElementById('formAlbaran').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const idx = parseInt(document.getElementById('editIndex').value);
+        const albaran = {
+            fecha:       document.getElementById('fecha').value,
+            operario:    document.getElementById('operario').value,
+            numVehiculo: document.getElementById('numVehiculo').value,
+            tipoVehiculo:document.getElementById('tipoVehiculo').value,
+            cliente:     document.getElementById('cliente').value,
+            obra:        document.getElementById('obra').value,
+            horas:       parseFloat(document.getElementById('horas').value) || 0,
+            foto:        fotoActual || (idx !== -1 && baseDatosAlbaranes[idx] ? baseDatosAlbaranes[idx].foto : null)
+        };
+        if(idx === -1) { baseDatosAlbaranes.push(albaran); }
+        else { baseDatosAlbaranes[idx] = albaran; document.getElementById('editIndex').value="-1"; resetBtn(); }
+        localStorage.setItem('albaranes_reales_datos', JSON.stringify(baseDatosAlbaranes));
+        fotoActual = null;
+        limpiarFormulario();
+        renderizarHistorial();
+    });
+
+    function renderizarHistorial() {
+        const container = document.getElementById('tablaCuerpo');
+        const filtroMes = document.getElementById('filtroMes').value;
+        container.innerHTML = '';
+        let total = 0;
+        const lista = baseDatosAlbaranes
+            .map((item, i) => ({...item, i}))
+            .sort((a,b)=> new Date(b.fecha)-new Date(a.fecha))
+            .filter(item => !filtroMes || item.fecha.substring(0,7)===filtroMes);
+
+        if(lista.length === 0) {
+            container.innerHTML = `
+                <div class="empty">
+                    <div class="e-icon">📭</div>
+                    <p>No hay albaranes este mes.<br>Sube una foto o rellena el formulario.</p>
+                </div>`;
+        } else {
+            lista.forEach(item => {
+                total += item.horas;
+                const fecha = new Date(item.fecha).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+                const div = document.createElement('div');
+                div.className = 'albaran-item';
+                div.innerHTML = `
+                    <div class="albaran-top">
+                        <span class="albaran-fecha">📅 ${fecha}</span>
+                        <span class="albaran-horas">${item.horas.toFixed(2)}<small> hrs</small></span>
+                    </div>
+                    <div class="albaran-body">
+                        <div style="display:flex;gap:12px;">
+                            ${item.foto ? `<img src="${item.foto}" class="albaran-thumb" onclick="verFoto('${item.foto}')">` : ''}
+                            <div style="flex:1;min-width:0;">
+                                <div class="albaran-cliente">${item.cliente || '—'}</div>
+                                <div class="albaran-obra">🏗 ${item.obra || 'Sin especificar'}</div>
+                                <div class="albaran-meta">
+                                    ${item.operario ? `<span class="meta-pill">👷 ${item.operario}</span>` : ''}
+                                    ${item.numVehiculo ? `<span class="meta-pill">🚛 ${item.numVehiculo}</span>` : ''}
+                                    ${item.tipoVehiculo ? `<span class="meta-pill">${item.tipoVehiculo}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="albaran-actions">
+                            <button class="btn btn-amber btn-sm" onclick="prepararEdicion(${item.i})">✏️ Editar</button>
+                            <button class="btn-danger-sm" onclick="borrarAlbaran(${item.i})">🗑 Borrar</button>
+                        </div>
+                    </div>`;
+                container.appendChild(div);
+            });
+        }
+        document.getElementById('totalHorasPanel').textContent = total.toFixed(2);
+    }
+
+    window.prepararEdicion = function(idx) {
+        const item = baseDatosAlbaranes[idx];
+        document.getElementById('editIndex').value = idx;
+        document.getElementById('fecha').value = item.fecha;
+        document.getElementById('operario').value = item.operario;
+        document.getElementById('numVehiculo').value = item.numVehiculo;
+        document.getElementById('tipoVehiculo').value = item.tipoVehiculo;
+        document.getElementById('cliente').value = item.cliente;
+        document.getElementById('obra').value = item.obra;
+        document.getElementById('horas').value = item.horas;
+        document.getElementById('btnGuardar').textContent = '✔ Actualizar cambios';
+        document.getElementById('btnGuardar').className = 'btn btn-amber';
+        document.getElementById('formAlbaran').scrollIntoView({behavior:'smooth',block:'start'});
+    };
+
+    window.borrarAlbaran = function(idx) {
+        if(confirm("¿Eliminar este albarán? No se puede deshacer.")) {
+            baseDatosAlbaranes.splice(idx,1);
+            localStorage.setItem('albaranes_reales_datos', JSON.stringify(baseDatosAlbaranes));
+            renderizarHistorial();
+        }
+    };
+
+    window.limpiarFormulario = function() {
+        document.getElementById('formAlbaran').reset();
+        document.getElementById('editIndex').value = "-1";
+        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+        resetBtn();
+    };
+
+    window.mostrarResumenMensual = function() {
+        const filtroMes = document.getElementById('filtroMes').value;
+        const lista = baseDatosAlbaranes.filter(item => !filtroMes || item.fecha.substring(0,7) === filtroMes);
+
+        // Agrupar horas por día (sumando si hay varios albaranes el mismo día)
+        const porDia = {};
+        lista.forEach(item => {
+            if (!porDia[item.fecha]) porDia[item.fecha] = 0;
+            porDia[item.fecha] += item.horas;
+        });
+
+        const fechasOrdenadas = Object.keys(porDia).sort((a,b) => new Date(a) - new Date(b));
+        const totalMes = fechasOrdenadas.reduce((acc, f) => acc + porDia[f], 0);
+
+        // Título con mes y año en español
+        let tituloMes = 'Resumen del mes';
+        if (filtroMes) {
+            const [anio, mes] = filtroMes.split('-');
+            const fechaRef = new Date(anio, mes - 1, 1);
+            tituloMes = fechaRef.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            tituloMes = tituloMes.charAt(0).toUpperCase() + tituloMes.slice(1);
+        }
+        document.getElementById('resumenTitulo').textContent = tituloMes;
+        document.getElementById('resumenTotalHoras').textContent = totalMes.toFixed(2) + ' hrs';
+
+        const listaEl = document.getElementById('resumenLista');
+        if (fechasOrdenadas.length === 0) {
+            listaEl.innerHTML = `<div class="resumen-empty">📭 No hay días trabajados registrados en este mes.</div>`;
+        } else {
+            listaEl.innerHTML = fechasOrdenadas.map(f => {
+                const d = new Date(f);
+                const diaSemana = d.toLocaleDateString('es-ES', { weekday: 'long' });
+                const diaMes = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+                return `
+                    <div class="resumen-dia">
+                        <span class="resumen-dia-fecha">${diaMes}<small>${diaSemana}</small></span>
+                        <span class="resumen-dia-horas">${porDia[f].toFixed(2)} hrs</span>
+                    </div>`;
+            }).join('');
+            listaEl.innerHTML += `<div style="padding:12px 4px 0;font-size:12px;color:var(--muted);text-align:center;">${fechasOrdenadas.length} día(s) trabajado(s)</div>`;
+        }
+
+        document.getElementById('resumenOverlay').classList.add('on');
+    };
+
+    window.cerrarResumen = function() {
+        document.getElementById('resumenOverlay').classList.remove('on');
+    };
+
+    window.verFoto = function(src) {
+        document.getElementById('fotoViewerImg').src = src;
+        document.getElementById('fotoViewer').classList.add('on');
+    };
+
+    window.cerrarFoto = function() {
+        document.getElementById('fotoViewer').classList.remove('on');
+    };
+
+    window.exportarDatos = function() {
+        const datos = localStorage.getItem('albaranes_reales_datos') || '[]';
+        const blob = new Blob([datos], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const fecha = new Date().toISOString().split('T')[0];
+        a.href = url;
+        a.download = `albaranes_backup_${fecha}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    window.importarDatos = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const nuevos = JSON.parse(e.target.result);
+                if (!Array.isArray(nuevos)) { alert('❌ El archivo no contiene un formato válido.'); return; }
+                const accion = confirm(`Se encontraron ${nuevos.length} albaranes en el archivo.\n\nPulsa "Aceptar" para AÑADIR estos a tu lista actual.\nPulsa "Cancelar" para sustituir toda tu lista por esta.`);
+                if (accion) {
+                    baseDatosAlbaranes = baseDatosAlbaranes.concat(nuevos);
+                } else {
+                    baseDatosAlbaranes = nuevos;
+                }
+                localStorage.setItem('albaranes_reales_datos', JSON.stringify(baseDatosAlbaranes));
+                renderizarHistorial();
+                alert('✅ Datos importados correctamente.');
+            } catch (err) {
+                alert('❌ Error al leer el archivo. Asegúrate de que es un backup válido.');
+            }
+            event.target.value = '';
+        };
+        reader.readAsText(file);
+    };
+
+    function resetBtn() {
+        document.getElementById('btnGuardar').textContent = '💾 Guardar en contabilidad';
+        document.getElementById('btnGuardar').className = 'btn btn-green';
+    }
+</script>
+</body>
+</html>

@@ -721,7 +721,7 @@
     // Ejemplo: https://albarania-proxy.tu-usuario.workers.dev
     // Mientras esté vacía, la app avisará y no podrá usar el lector IA.
     // ============================================================
-    const WORKER_URL = '';
+    const WORKER_URL = 'https://albarania-proxy.daloma75.workers.dev';
 
     const PROMPT_OCR = "Analiza la imagen de este albarán de trabajo y extrae los siguientes datos estrictamente en formato JSON válido, sin usar markdown ni bloques de código, solo el objeto JSON plano con estas claves: 'fecha' (en formato YYYY-MM-DD), 'operario', 'numVehiculo', 'tipoVehiculo', 'cliente', 'obra', 'horas' (un número decimal que sea el resultado de sumar las horas trabajadas que aparecen en las líneas de conceptos). Si no encuentras un dato pon cadena vacía.";
 
